@@ -67,7 +67,7 @@ def handle_message(event):
         user_id = event.source.user_id
 # --------------Administrator--------------------------------
         if event.message.text == "help":
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
@@ -81,7 +81,7 @@ def handle_message(event):
                 )
 
         if event.message.text == "用戶註冊列表":
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
                                          passwd='123qwe', db='room_data', charset='utf8mb4')
@@ -107,7 +107,7 @@ def handle_message(event):
                 )
 
         if event.message.text == "用戶確認註冊":
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
@@ -121,7 +121,7 @@ def handle_message(event):
                 )
 
         elif str(event.message.text).find("OK") != -1 or str(event.message.text).find("ok") != -1:
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 try:
                     data_1, data_2 = str(event.message.text).split('OK', 1)
                     check = str(data_2)
@@ -163,7 +163,7 @@ def handle_message(event):
                 )
 # -----------------------------------------------
         if event.message.text == "開門":
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 client = mqtt.Client()
                 client.username_pw_set("yujie", "12345")
                 client.connect("192.168.1.112", 1883, 60)
@@ -177,7 +177,7 @@ def handle_message(event):
                 )
 
         elif str(event.message.text).find("P") != -1 or str(event.message.text).find("p") != -1:
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 try:
                     data_1, data_2 = str(event.message.text).split('P', 1)
                     name, room_no, phone = str(data_2).split(' ', 2)
@@ -266,7 +266,7 @@ def handle_message(event):
             db.close()
 
         elif event.message.text == "故障回報":
-            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+            if user_id == "Administrator UserID":
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="上傳圖片並描述問題。")
