@@ -1,4 +1,5 @@
 from flask import Flask, request, abort
+from linebot import exceptions
 import paho.mqtt.client as mqtt
 import paho.mqtt.subscribe as subscribe
 from linebot import (
@@ -67,7 +68,8 @@ def handle_message(event):
         user_id = event.source.user_id
 # --------------Administrator--------------------------------
         if event.message.text == "help":
-            if user_id == "Administrator UserID":
+            if user_id == "U892b576cb7c0398b94208100d51c5c08":
+                print(search_user(user_id))
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
@@ -81,13 +83,13 @@ def handle_message(event):
                 )
 
         if event.message.text == "用戶註冊列表":
-            if user_id == "Administrator UserID":
+            if user_id == "U892b576cb7c0398b94208100d51c5c08":
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
                                          passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
-                    sql = """SELECT id,name,phone,check_status FROM tenant_info WHERE check_status = 'n' """
-                    cursor.execute(sql)
+                    cursor.execute(
+                        "SELECT id,name,phone,check_status FROM tenant_info WHERE check_status = 'n'")
                     tup = cursor.fetchall()
                     notice = "用戶註冊列表"
                     for i in range(len(tup)):
@@ -107,7 +109,7 @@ def handle_message(event):
                 )
 
         if event.message.text == "用戶確認註冊":
-            if user_id == "Administrator UserID":
+            if user_id == "U892b576cb7c0398b94208100d51c5c08":
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
@@ -121,7 +123,7 @@ def handle_message(event):
                 )
 
         elif str(event.message.text).find("OK") != -1 or str(event.message.text).find("ok") != -1:
-            if user_id == "Administrator UserID":
+            if user_id == "U892b576cb7c0398b94208100d51c5c08":
                 try:
                     data_1, data_2 = str(event.message.text).split('OK', 1)
                     check = str(data_2)
@@ -163,55 +165,16 @@ def handle_message(event):
                 )
 # -----------------------------------------------
         if event.message.text == "開門":
-            if user_id == "Administrator UserID":
+            if search_user(user_id) == 'Y':
                 client = mqtt.Client()
                 client.username_pw_set("yujie", "12345")
                 client.connect("192.168.1.112", 1883, 60)
                 client.publish("esp8266/opendoorsub", "o")
-
                 client.subscribe("esp8266/opendoorpub")
-            else:
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text="你沒有權限")
+                    TextSendMessage(text="門已開啟")
                 )
-
-        elif str(event.message.text).find("P") != -1 or str(event.message.text).find("p") != -1:
-            if user_id == "Administrator UserID":
-                try:
-                    data_1, data_2 = str(event.message.text).split('P', 1)
-                    name, room_no, phone = str(data_2).split(' ', 2)
-                except Exception as e:
-                    pass
-
-                try:
-                    data_1, data_2 = str(event.message.text).split('p', 1)
-                    name, room_no, phone = str(data_2).split(' ', 2)
-                except Exception as e:
-                    pass
-
-                try:
-                    db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
-                    cursor = db.cursor()
-                    sql = """INSERT INTO tenant_info(name, room_no, phone, lineid, checkcode, check_status) VALUES('""" + name + """', '""" + \
-                        room_no + """', '""" + phone + """', '""" + '1' + \
-                        """', '""" + name + phone + """', '""" + 'n' + """')"""
-                    cursor.execute(sql)
-                    db.commit()
-                    print("輸入成功")
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text="輸入成功")
-                    )
-                except Exception as e:
-                    db.rollback()
-                    line_bot_api.reply_message(
-                        event.reply_token,
-                        TextSendMessage(text="輸入失敗")
-                    )
-                    print(e)
-                db.close()
             else:
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -266,7 +229,7 @@ def handle_message(event):
             db.close()
 
         elif event.message.text == "故障回報":
-            if user_id == "Administrator UserID":
+            if search_user(user_id) == 'Y':
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="上傳圖片並描述問題。")
@@ -314,6 +277,21 @@ def handle_message(event):
                 event.reply_token,
                 TextSendMessage('上傳失敗'))
         return 0
+
+
+def search_user(user_id):
+    try:
+        db = MySQLdb.connect(host='localhost', port=3306, user='root',
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT check_status FROM tenant_info WHERE lineid = '%s'" % (user_id))
+        checkcorrect = cursor.fetchone()
+        return checkcorrect[0]
+    except Exception as e:
+        print(e)
+    finally:
+        db.close()
 
 
 if __name__ == "__main__":
