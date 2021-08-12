@@ -40,7 +40,7 @@ CREATE TABLE `failure_report` (
 
 LOCK TABLES `failure_report` WRITE;
 /*!40000 ALTER TABLE `failure_report` DISABLE KEYS */;
-INSERT INTO `failure_report` VALUES (5,'葉禹杰','Administrator','0933547264','壞了','2021-08-12 23:10:50','尚未檢查'),(6,'葉禹杰','Administrator','0933547264','水管爆了','2021-08-12 23:13:21','尚未檢查');
+INSERT INTO `failure_report` VALUES (5,'1','Administrator','093412312','壞了','2021-08-12 23:10:50','尚未檢查'),(6,'1','Administrator','09212312364','水管爆了','2021-08-12 23:13:21','尚未檢查');
 /*!40000 ALTER TABLE `failure_report` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -69,7 +69,7 @@ CREATE TABLE `tenant_info` (
 
 LOCK TABLES `tenant_info` WRITE;
 /*!40000 ALTER TABLE `tenant_info` DISABLE KEYS */;
-INSERT INTO `tenant_info` VALUES (9,'葉禹杰','a87','0933547264','U892b576cb7c0398b94208100d51c5c08',NULL,'Y');
+INSERT INTO `tenant_info` VALUES (9,'1','a87','09121234','U892b576c5c08',NULL,'Y');
 /*!40000 ALTER TABLE `tenant_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
