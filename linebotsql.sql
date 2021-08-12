@@ -16,6 +16,35 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `failure_report`
+--
+
+DROP TABLE IF EXISTS `failure_report`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `failure_report` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) DEFAULT NULL,
+  `room_no` varchar(45) DEFAULT NULL,
+  `phone` varchar(45) DEFAULT NULL,
+  `report` varchar(45) DEFAULT NULL,
+  `date` varchar(45) DEFAULT NULL,
+  `schedule` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `failure_report`
+--
+
+LOCK TABLES `failure_report` WRITE;
+/*!40000 ALTER TABLE `failure_report` DISABLE KEYS */;
+INSERT INTO `failure_report` VALUES (5,'葉禹杰','Administrator','0933547264','壞了','2021-08-12 23:10:50','尚未檢查'),(6,'葉禹杰','Administrator','0933547264','水管爆了','2021-08-12 23:13:21','尚未檢查');
+/*!40000 ALTER TABLE `failure_report` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `tenant_info`
 --
 
@@ -31,7 +60,7 @@ CREATE TABLE `tenant_info` (
   `checkcode` varchar(45) DEFAULT NULL,
   `check_status` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,9 +69,13 @@ CREATE TABLE `tenant_info` (
 
 LOCK TABLES `tenant_info` WRITE;
 /*!40000 ALTER TABLE `tenant_info` DISABLE KEYS */;
-INSERT INTO `tenant_info` VALUES (2,'王大明','Administrator','0912345678','AHSDKAHKSJDHAKJSH','王大明0912345678','Y');
+INSERT INTO `tenant_info` VALUES (9,'葉禹杰','a87','0933547264','U892b576cb7c0398b94208100d51c5c08',NULL,'Y');
 /*!40000 ALTER TABLE `tenant_info` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'room_data'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -53,4 +86,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-04-19 22:01:25
+-- Dump completed on 2021-08-13  1:56:55
