@@ -22,6 +22,10 @@
 * 故障回報：將故障或問題回報給房東，可附照片。
 
 ## 使用說明
+### 指令查詢
+```
+help
+```
 ### 註冊
 * 加入帳號為好友後，傳送訊息"房客註冊"，會要求你輸入姓名、房號、電話和信箱，驗證碼會寄到信箱，輸入正確的驗證碼後需等管理員確認後，完成註冊。
 * 註冊成功後，會發送信件通知。
@@ -30,10 +34,22 @@
 用戶端
 <img align="left" src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad1-1.png"><img  src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad1.jpg">
 管理員端
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us2.jpg">
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us2.png">
 用戶收到確認信
 
-### 指令查詢
+### 房間資訊
+查看房間的溫度和濕度，以及台灣目前用電量。
+* (資料來自https://www.taipower.com.tw/tc/page.aspx?mid=206)
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us3.jpg">
+
+### 故障回報
+* 房客回報故障需要維修或是問題給房東。.
 ```
-help
+指令為：r(空格)您要回報的問題
 ```
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us4.jpg">
+
+
+
+
+
