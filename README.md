@@ -30,3 +30,10 @@
 用戶端
 <img align="left" src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad1-1.png"><img  src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad1.jpg">
 管理員端
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us2.jpg">
+用戶收到確認信
+
+### 指令查詢
+'''
+help
+'''
