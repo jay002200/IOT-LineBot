@@ -51,7 +51,7 @@ help
 用戶端
 <img align="left" src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ade2.jpg"><img  src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad3.jpg">
 管理員收到通知後，更改進度。
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us7.jpg">
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us7.png">
 用戶收到進度通知。
 
 ### 開門
@@ -63,6 +63,7 @@ help
 ```
 指令：find(空格)房客的房號
 ```
+
 <img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad2.jpg">
 
 ## 使用到的工具
