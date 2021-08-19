@@ -53,10 +53,18 @@ help
 
 <img align="left" src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ade2.jpg"><img  src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ad3.jpg">
 
+
+
+
 管理員收到通知後，更改進度。
+
+
+
 
 <img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us7.png">
 用戶收到進度通知。
+
+
 
 
 
