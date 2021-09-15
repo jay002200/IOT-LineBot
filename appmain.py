@@ -43,6 +43,7 @@ client_secret = config.get('imgur', 'imgur_client_secret')
 access_token = config.get('imgur', 'imgur_access_token')
 refresh_token = config.get('imgur', 'imgur_refresh_token')
 
+mqtt_address = config.get('mqtt','mqtt_ip')
 
 static_tmp_path = os.path.join(os.path.dirname(
     __file__), 'static', 'C:/Users/goldcity5/Desktop/project/pylinebot/pic')
@@ -109,7 +110,8 @@ def handle_message(event):
                                     QuickReplyButton(action=MessageAction(
                                         label="開啟電器", text="開啟電器")),
                                     QuickReplyButton(action=MessageAction(
-                                        label="關閉電器", text="關閉"))
+                                        label="關閉電器", text="關閉電器")),
+                                    
                                 ])))
                 else:
                     line_bot_api.reply_message(
@@ -300,7 +302,7 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開啟電器", text="開啟電器")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉")),
+                                                label="關閉電器", text="關閉電器")),
                                         ]
                                     ))
                 )
@@ -356,7 +358,7 @@ def handle_message(event):
                                                 QuickReplyButton(action=MessageAction(
                                                     label="開啟電器", text="開啟電器")),
                                                 QuickReplyButton(action=MessageAction(
-                                                    label="關閉電器", text="關閉")),
+                                                    label="關閉電器", text="關閉電器")),
                                             ]
                                         ))
                     )
@@ -384,7 +386,7 @@ def handle_message(event):
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 client = mqtt.Client()
                 client.username_pw_set("yujie", "12345")
-                client.connect("192.168.1.112", 1883, 60)
+                client.connect(mqtt_address, 1883, 60)
                 client.publish("esp8266/opendoorsub", "o")
                 line_bot_api.reply_message(
                     event.reply_token,
@@ -400,7 +402,7 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開啟電器", text="開啟電器")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉")),
+                                                label="關閉電器", text="關閉電器")),
                                         ]
                                     ))
                 )
@@ -417,6 +419,80 @@ def handle_message(event):
                                         ]))
                 )
 
+        elif event.message.text == "開啟電器":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                client = mqtt.Client()
+                client.username_pw_set("yujie", "12345")
+                client.connect(mqtt_address, 1883, 60)
+                client.publish("esp8266/opendoorsub", "n")
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="電源已開啟",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="故障回報", text="故障回報")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開門", text="開門")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電器", text="開啟電器")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電器", text="關閉電器")),
+                                        ]
+                                    ))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="非本棟用戶，拒絕使用。",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
+                                        ]))
+                )
+
+        elif event.message.text == "關閉電器":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                client = mqtt.Client()
+                client.username_pw_set("yujie", "12345")
+                client.connect(mqtt_address, 1883, 60)
+                client.publish("esp8266/opendoorsub", "f")
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="電源已關閉",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="故障回報", text="故障回報")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開門", text="開門")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電器", text="開啟電器")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電器", text="關閉電器")),
+                                        ]
+                                    ))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="非本棟用戶，拒絕使用。",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
+                                        ]))
+                )
+                   
         elif event.message.text == "房間資訊":
             if search_user(user_id) == 'Y':
                 curr = currload()
@@ -438,7 +514,7 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開啟電器", text="開啟電器")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉")),
+                                                label="關閉電器", text="關閉電器")),
                                         ]
                                     ))
                 )
@@ -535,7 +611,7 @@ def handle_message(event):
                                 QuickReplyButton(action=MessageAction(
                                     label="開啟電器", text="開啟電器")),
                                 QuickReplyButton(action=MessageAction(
-                                    label="關閉電器", text="關閉")),
+                                    label="關閉電器", text="關閉電器")),
                             ]
                         ))
                 )
@@ -574,7 +650,7 @@ def handle_message(event):
                     cursor.execute(
                         "INSERT INTO failure_report(name,room_no,phone,report,date,schedule,email) VALUES ('%s','%s','%s','%s','%s','尚未檢查','%s')" % (info[0], info[1], info[2], data_2, date, info[3]))
                     db.commit()
-                    notice = "以下是房客的故障問題回報：\n姓名：{0}\n房號：{1}\n電話：{2}\n問題描述：{3}\n回報日期：{4}".format(
+                    notice = "以下是房客的故障問題回報：\n姓名：{0}\n房號：{1}\n電話：{2}\n問題描述：{3}\n回報日期：{4}\n相簿網址：'https://imgur.com/a/cvFJ6ib'".format(
                         info[0], info[1], info[2], data_2, date)
                     subject = "房客故障問題回報通知!"
                     emailnotify(subject, notice)
@@ -592,7 +668,7 @@ def handle_message(event):
                                                 QuickReplyButton(action=MessageAction(
                                                     label="開啟電器", text="開啟電器")),
                                                 QuickReplyButton(action=MessageAction(
-                                                    label="關閉電器", text="關閉")),
+                                                    label="關閉電器", text="關閉電器")),
                                             ]
                                         ))
                     )
@@ -658,7 +734,7 @@ def handle_message(event):
 
     reply_arr = []
     reply_arr.append(TextSendMessage('上傳成功'))
-    reply_arr.append(TextSendMessage('相簿網址:https://imgur.com/a/'))
+    reply_arr.append(TextSendMessage('相簿網址:https://imgur.com/a/-'))
 
     if isinstance(event.message, ImageMessage):
         ext = 'jpg'
@@ -857,8 +933,8 @@ def currload():
 def emailnotify(subject, notice):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "@gmail.com"  # 寄件者
-    content["to"] = "@gmail.com"  # 收件者
+    content["from"] = "-"  # 寄件者
+    content["to"] = "-"  # 收件者
     content.attach(
         MIMEText("{0}".format(notice)))  # 郵件內容
 
@@ -866,7 +942,7 @@ def emailnotify(subject, notice):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("-", "-")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             smtp.quit()
             print("傳送成功!")
@@ -877,7 +953,7 @@ def emailnotify(subject, notice):
 def sendcheckcode(email, emailcheckcode):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = "註冊宿舍驗證碼"  # 郵件標題
-    content["from"] = "@gmail.com"  # 寄件者
+    content["from"] = "-"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的驗證碼為：{0}".format(emailcheckcode)))  # 郵件內容
@@ -886,7 +962,7 @@ def sendcheckcode(email, emailcheckcode):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("-", "-")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -897,7 +973,7 @@ def sendcheckcode(email, emailcheckcode):
 def sendsuccess(subject, email):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "@gmail.com"  # 寄件者
+    content["from"] = "-"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的資料已經認證成功!可開始使用各項功能!"))  # 郵件內容
@@ -906,7 +982,7 @@ def sendsuccess(subject, email):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("-@gmail.com", "-")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -917,7 +993,7 @@ def sendsuccess(subject, email):
 def sendchange(email, attach):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = "維修進度已變動!"  # 郵件標題
-    content["from"] = "@gmail.com"  # 寄件者
+    content["from"] = "-@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("維修進度已變更成：{0}".format(attach)))  # 郵件內容
@@ -926,7 +1002,7 @@ def sendchange(email, attach):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("-", "-")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
