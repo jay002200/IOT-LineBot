@@ -42,6 +42,18 @@ help
 * (資料來自https://www.taipower.com.tw/tc/page.aspx?mid=206)
 <img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us3.jpg">
 
+### 開啟/關閉電器
+* 傳送指令，房客就可開/關自己房間的插座電源。
+```
+指令:開啟電器
+```
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/207088.gif">
+```
+指令:關閉電器
+```
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/207087.gif">
+關閉電源
+
 ### 故障回報
 * 房客回報故障需要維修或是問題給房東。
 ```
