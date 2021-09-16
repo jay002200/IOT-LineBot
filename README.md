@@ -105,8 +105,10 @@ help
 * ngrok
 ### 硬體
 * Arduino ESP8266、ESP32
+* 電控鎖、RC522、插座、繼電器
 * 電腦
 * 手機
+* 3D列印機
 ### 通訊設備/協定
 * MQTT
 * Http
