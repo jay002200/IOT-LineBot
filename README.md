@@ -107,6 +107,8 @@ help
 * Arduino ESP8266、ESP32
 * 電腦
 * 手機
+### 通訊設備/協定
+* MQTT
 
 
 
