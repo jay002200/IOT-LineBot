@@ -95,13 +95,21 @@ help
 ![alt text](https://github.com/jay002200/IOT-LineBot/blob/main/img/ad2.jpg)
 
 ## 使用到的工具
+### 軟體
 * python
 * flask
 * mysql
-* arduino
-* line api
+* Line Bot-SDK
 * Mosquitto
-* imgur api
+* Line
+* ngrok
+### 硬體
+* Arduino ESP8266、ESP32
+* 電腦
+* 手機
+
+
+
 
 
 
