@@ -16,8 +16,8 @@
 ### 房客：
 
 * 開門：輸入開門即可開啟宿舍大門。
-* 房間資訊：查看目前房間室內溫度及濕度(尚未實裝)，以及台灣目前電力使用狀況。
-* 開/關啟電燈(尚未實裝)：開/關自己房間的電燈。
+* 房間資訊：查看目前房間室內溫度及濕度，以及台灣目前電力使用狀況。
+* 開/關啟電燈：開/關自己房間的電燈。
 * 開/關閉插座電源：開/關自己房間的插座電源。
 * 故障回報：將故障或問題回報給房東，可附照片。
 
@@ -40,7 +40,7 @@ help
 ### 房間資訊
 查看房間的溫度和濕度，以及台灣目前用電量。
 * (資料來自https://www.taipower.com.tw/tc/page.aspx?mid=206)
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/us3.jpg">
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/roominfo.png">
 
 ### 開啟/關閉電器
 * 傳送指令，房客就可開/關自己房間的插座電源。
@@ -55,6 +55,20 @@ help
 
 <img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/207087.gif">
 關閉電源
+
+### 開啟/關閉電器
+* 傳送指令，房客就可開/關自己房間的插座電源。
+```
+指令:開啟電燈
+```
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ledon.gif">
+
+```
+指令:關閉電燈
+```
+
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ledoff.gif">
+
 
 ### 故障回報
 * 房客回報故障需要維修或是問題給房東。
