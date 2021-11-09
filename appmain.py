@@ -25,8 +25,12 @@ import requests
 import os
 import tempfile
 import MySQLdb
-
-
+import serial
+import cv2
+import numpy as np
+from PIL import ImageFont, ImageDraw, Image
+import string
+import pyimgur
 app = Flask(__name__)
 
 config = configparser.ConfigParser()
@@ -75,7 +79,49 @@ def handle_message(event):
         user_id = event.source.user_id
         replymessage = event.message.text
         echeckcode = re.split(r'[\s]\s*', replymessage)
+        
+        light_poweronoffmenu = ImagemapSendMessage(
+        base_url='https://imgur.com/PwD2PiS.jpg',
+        alt_text='圖片',
+        base_size=BaseSize(height=720, width=1280),     
+        actions=[
+            MessageImagemapAction(
+                text='開啟電燈',
+                area=ImagemapArea(
+                    x=224, y=13, width=400, height=380
+                )
+            ),
+            MessageImagemapAction(
+                text='關閉電燈',
+                area=ImagemapArea(
+                    x=699, y=16, width=400, height=380
+                )
+            )
+        ]
+        )
+        
+        home_poweronoffmenu = ImagemapSendMessage(
+        base_url='https://imgur.com/PwD2PiS.jpg',
+        alt_text='圖片',
+        base_size=BaseSize(height=720, width=1280),     
+        actions=[
+            MessageImagemapAction(
+                text='開啟插座電源',
+                area=ImagemapArea(
+                    x=224, y=13, width=400, height=380
+                )
+            ),
+            MessageImagemapAction(
+                text='關閉插座電源',
+                area=ImagemapArea(
+                    x=699, y=16, width=400, height=380
+                )
+            )
+        ]
+        )
+
 # --------------Administrator--------------------------------
+        
         if event.message.text == "help" or event.message.text == "Help":
             if search_user(user_id) == "Administrator":
                 line_bot_api.reply_message(
@@ -90,9 +136,12 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="查詢房客", text="查詢房客")),
                                             QuickReplyButton(action=MessageAction(
+                                                label="查看回報", text="查看回報")),
+                                            QuickReplyButton(action=MessageAction(
                                                 label="幫助", text="help")),
-                                        ]))
-                )
+                                            QuickReplyButton(action=MessageAction(
+                                                label="管理員選單", text="管理員選單"))
+                                        ])))
             else:
                 if(search_user(user_id) == 'Y'):
                     line_bot_api.reply_message(
@@ -108,10 +157,13 @@ def handle_message(event):
                                     QuickReplyButton(action=MessageAction(
                                         label="開門", text="開門")),
                                     QuickReplyButton(action=MessageAction(
-                                        label="開啟電器", text="開啟電器")),
+                                        label="開啟插座電源", text="開啟插座電源")),
                                     QuickReplyButton(action=MessageAction(
-                                        label="關閉電器", text="關閉電器")),
-                                    
+                                        label="關閉插座電源", text="關閉插座電源")),
+                                    QuickReplyButton(action=MessageAction(
+                                        label="開啟電燈", text="開啟電燈")),
+                                    QuickReplyButton(action=MessageAction(
+                                        label="關閉電燈", text="關閉電燈"))                                    
                                 ])))
                 else:
                     line_bot_api.reply_message(
@@ -134,7 +186,7 @@ def handle_message(event):
                 array.append(TextSendMessage('先輸入OK，再輸入ID號碼。例：ok 3'))
                 line_bot_api.reply_message(
                     event.reply_token,
-                    array
+                    array 
                 )
             else:
                 line_bot_api.reply_message(
@@ -143,18 +195,12 @@ def handle_message(event):
                                     quick_reply=QuickReply(
                                         items=[
                                             QuickReplyButton(action=MessageAction(
-                                                label="用戶註冊列表", text="用戶註冊列表")),
+                                                label="房客註冊", text="房客註冊")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="房客回報問題列表", text="房客回報問題列表")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="查詢房客", text="查詢房客")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="查看回報", text="查看回報")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="幫助", text="help")),
-                                        ])
+                                                label="幫助", text="help"))
+                                    ])
                                     )
-                )
+                    )
 
         elif str(event.message.text).find("ok") != -1:
             if search_user(user_id) == "Administrator":
@@ -172,7 +218,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
+                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "UPDATE tenant_info SET check_status='Y' WHERE id='%s'" % (check))
@@ -199,13 +245,15 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="你沒有權限",
-                                    items=[
-                                        QuickReplyButton(action=MessageAction(
-                                            label="房客註冊", text="房客註冊")),
-                                        QuickReplyButton(action=MessageAction(
-                                            label="幫助", text="help"))
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
                                     ])
-                )
+                                    )
+                    )
 
         elif event.message.text == "房客回報問題列表":
             if search_user(user_id) == "Administrator":
@@ -215,25 +263,20 @@ def handle_message(event):
                 array.append(TextSendMessage('更改進度，請先輸入ch。\n例：ch 2 檢查中'))
                 line_bot_api.reply_message(
                     event.reply_token,
-                    array,
+                    array
                 )
-            else:
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="你沒有權限",
                                     quick_reply=QuickReply(
                                         items=[
                                             QuickReplyButton(action=MessageAction(
-                                                label="用戶註冊列表", text="用戶註冊列表")),
+                                                label="房客註冊", text="房客註冊")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="查詢房客", text="查詢房客")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="查看回報", text="查看回報")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="幫助", text="help")),
-                                        ])
+                                                label="幫助", text="help"))
+                                    ])
                                     )
-                )
+                    )
 
         elif str(event.message.text).find("ch") != -1 or str(event.message.text).find("Ch") != -1:
             if search_user(user_id) == "Administrator":
@@ -251,7 +294,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
+                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "UPDATE failure_report SET schedule='{0}' WHERE id='{1}'".format(
@@ -294,29 +337,32 @@ def handle_message(event):
                                     quick_reply=QuickReply(
                                         items=[
                                             QuickReplyButton(action=MessageAction(
+                                                label="用戶註冊列表", text="用戶註冊列表")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客回報問題列表", text="房客回報問題列表")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="查詢房客", text="查詢房客")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="查看回報", text="查看回報")),
+                                            QuickReplyButton(action=MessageAction(
                                                 label="幫助", text="help")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="故障回報", text="故障回報")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="開門", text="開門")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="開啟電器", text="開啟電器")),
-                                            QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉電器")),
-                                        ]
+                                                label="管理員選單", text="管理員選單"))
+                                        ])
                                     ))
-                )
             else:
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="你沒有權限",
-                                    items=[
-                                        QuickReplyButton(action=MessageAction(
-                                            label="房客註冊", text="房客註冊")),
-                                        QuickReplyButton(action=MessageAction(
-                                            label="幫助", text="help"))
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
                                     ])
-                )
+                                    )
+                    )
 
         elif str(event.message.text).find("find") != -1 or str(event.message.text).find("Find") != -1:
             if search_user(user_id) == "Administrator":
@@ -334,7 +380,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
+                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "SELECT room_no,name,phone FROM tenant_info WHERE room_no = '%s'" % (check))
@@ -348,20 +394,23 @@ def handle_message(event):
                         event.reply_token,
                         TextSendMessage(text=output,
                                         quick_reply=QuickReply(
-                                            items=[
-                                                QuickReplyButton(action=MessageAction(
-                                                    label="幫助", text="help")),
-                                                QuickReplyButton(action=MessageAction(
-                                                    label="故障回報", text="故障回報")),
-                                                QuickReplyButton(action=MessageAction(
-                                                    label="開門", text="開門")),
-                                                QuickReplyButton(action=MessageAction(
-                                                    label="開啟電器", text="開啟電器")),
-                                                QuickReplyButton(action=MessageAction(
-                                                    label="關閉電器", text="關閉電器")),
-                                            ]
-                                        ))
-                    )
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="用戶註冊列表", text="用戶註冊列表")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客回報問題列表", text="房客回報問題列表")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="查詢房客", text="查詢房客")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="查看回報", text="查看回報")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="管理員選單", text="管理員選單"))
+                                        ])
+                                        )
+                        )
+                    
                 except Exception as e:
                     db.rollback()
                     line_bot_api.reply_message(
@@ -374,13 +423,19 @@ def handle_message(event):
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="你沒有權限",
-                                    items=[
-                                        QuickReplyButton(action=MessageAction(
-                                            label="房客註冊", text="房客註冊")),
-                                        QuickReplyButton(action=MessageAction(
-                                            label="幫助", text="help"))
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
                                     ])
-                )
+                                    )
+                    )
+        
+        elif event.message.text == "管理員選單":
+            if search_user(user_id) == "Administrator":
+                line_bot_api.link_rich_menu_to_user(user_id, "richmenu-cb829a6c6bf801897231cdab400c21cc")
 # -----------------------------------------------
         elif event.message.text == "開門":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
@@ -400,9 +455,13 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開門", text="開門")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="開啟電器", text="開啟電器")),
+                                                label="開啟插座電源", text="開啟插座電源")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉電器")),
+                                                label="關閉插座電源", text="關閉插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電燈", text="開啟電燈")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電燈", text="關閉電燈"))
                                         ]
                                     ))
                 )
@@ -419,12 +478,20 @@ def handle_message(event):
                                         ]))
                 )
 
-        elif event.message.text == "開啟電器":
+        elif event.message.text == "插座":
+            line_bot_api.reply_message(
+                event.reply_token,
+                home_poweronoffmenu
+            ) 
+            
+        elif event.message.text == "開啟插座電源":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
-                client = mqtt.Client()
-                client.username_pw_set("yujie", "12345")
-                client.connect(mqtt_address, 1883, 60)
-                client.publish("esp8266/opendoorsub", "n")
+                checkroom = search_user_info(user_id)
+                if checkroom[1] == "A1":
+                    client = mqtt.Client()
+                    client.username_pw_set("yujie", "12345")
+                    client.connect(mqtt_address, 1883, 60)
+                    client.publish("esp8266/opendoorsub", "n")
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="電源已開啟",
@@ -437,9 +504,13 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開門", text="開門")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="開啟電器", text="開啟電器")),
+                                                label="開啟插座電源", text="開啟插座電源")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉電器")),
+                                                label="關閉插座電源", text="關閉插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電燈", text="開啟電燈")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電燈", text="關閉電燈"))
                                         ]
                                     ))
                 )
@@ -456,12 +527,14 @@ def handle_message(event):
                                         ]))
                 )
 
-        elif event.message.text == "關閉電器":
+        elif event.message.text == "關閉插座電源":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
-                client = mqtt.Client()
-                client.username_pw_set("yujie", "12345")
-                client.connect(mqtt_address, 1883, 60)
-                client.publish("esp8266/opendoorsub", "f")
+                checkroom = search_user_info(user_id)
+                if checkroom[1] == "A1":
+                    client = mqtt.Client()
+                    client.username_pw_set("yujie", "12345")
+                    client.connect(mqtt_address, 1883, 60)
+                    client.publish("esp8266/opendoorsub", "f")
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(text="電源已關閉",
@@ -474,9 +547,13 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開門", text="開門")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="開啟電器", text="開啟電器")),
+                                                label="開啟插座電源", text="開啟插座電源")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉電器")),
+                                                label="關閉插座電源", text="關閉插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電燈", text="開啟電燈")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電燈", text="關閉電燈"))
                                         ]
                                     ))
                 )
@@ -492,17 +569,24 @@ def handle_message(event):
                                                 label="幫助", text="help"))
                                         ]))
                 )
-                   
-        elif event.message.text == "房間資訊":
-            if search_user(user_id) == 'Y':
-                curr = currload()
-                text1 = "房間目前溫度：\n房間目前濕度：\n\n\n台灣目前用電量：{0}萬千瓦\n目前使用率：{1}\n{2}".format(
-                    curr[0], curr[1], curr[2])
-                text2 = "\n\n(資料來自台電官網)"
-                text1 += text2
+        
+        elif event.message.text == "電燈":
+            line_bot_api.reply_message(
+                event.reply_token,
+                light_poweronoffmenu
+            )   
+            
+        elif event.message.text == "開啟電燈":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                checkroom = search_user_info(user_id)
+                if checkroom[1] == "A1":
+                    client = mqtt.Client()
+                    client.username_pw_set("yujie", "12345")
+                    client.connect(mqtt_address, 1883, 60)
+                    client.publish("esp8266/opendoorsub", "L")
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=text1,
+                    TextSendMessage(text="電燈已開啟",
                                     quick_reply=QuickReply(
                                         items=[
                                             QuickReplyButton(action=MessageAction(
@@ -512,11 +596,100 @@ def handle_message(event):
                                             QuickReplyButton(action=MessageAction(
                                                 label="開門", text="開門")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="開啟電器", text="開啟電器")),
+                                                label="開啟插座電源", text="開啟插座電源")),
                                             QuickReplyButton(action=MessageAction(
-                                                label="關閉電器", text="關閉電器")),
+                                                label="關閉插座電源", text="關閉插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電燈", text="開啟電燈")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電燈", text="關閉電燈"))
                                         ]
                                     ))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="非本棟用戶，拒絕使用。",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
+                                        ]))
+                )
+
+        elif event.message.text == "關閉電燈":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                checkroom = search_user_info(user_id)
+                if checkroom[1] == "A1":
+                    client = mqtt.Client()
+                    client.username_pw_set("yujie", "12345")
+                    client.connect(mqtt_address, 1883, 60)
+                    client.publish("esp8266/opendoorsub", "l")
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="電燈已關閉",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="故障回報", text="故障回報")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開門", text="開門")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟插座電源", text="開啟插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉插座電源", text="關閉插座電源")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="開啟電燈", text="開啟電燈")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="關閉電燈", text="關閉電燈"))
+                                        ]
+                                    ))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="非本棟用戶，拒絕使用。",
+                                    quick_reply=QuickReply(
+                                        items=[
+                                            QuickReplyButton(action=MessageAction(
+                                                label="房客註冊", text="房客註冊")),
+                                            QuickReplyButton(action=MessageAction(
+                                                label="幫助", text="help"))
+                                        ]))
+                )     
+                          
+        elif event.message.text == "房間資訊":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                curr = currload()
+                ser = serial.Serial("COM13",115200,timeout = 5) # 開啟com3口，波特率115200，超時5
+                ser.flushInput() # 清空緩衝區
+                DHT_data=[]
+                while True:
+                    count = ser.inWaiting() # 獲取串列埠緩衝區資料
+                    if count !=0 :
+                        DHT_data = ser.read(ser.in_waiting).decode("gbk") # 讀出串列埠資料，資料採用gbk編碼
+                        if DHT_data != 0:
+                            break
+                
+                
+                text1 = str(DHT_data[5:11]) + "℃"
+                text2 = "濕度:" + str(DHT_data[0:4]) + "%RH"
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    [
+                    ImageSendMessage(
+                        original_content_url=make_temp_pic(text1,text2),
+                        preview_image_url=make_temp_pic(text1,text2)
+                    ),
+                    ImageSendMessage(
+                        original_content_url=make_power_pic(curr[1]),
+                        preview_image_url=make_power_pic(curr[1])
+                    )
+                    ]
                 )
             else:
                 line_bot_api.reply_message(
@@ -565,12 +738,12 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
+                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     try:
                         emailcheckcode = random.randrange(10000, 99999)
                         cursor.execute(
-                            "INSERT INTO tenant_info(name,room_no,phone,lineid,email,check_status,emailCheckcode) VALUES('%s','%s','%s','%s','%s','en','%s')" % (name, room_no, phone, user_id, email, emailcheckcode))
+                            "INSERT INTO tenant_info(name,room_no,phone,lineid,email,check_status,emailCheckcode,time) VALUES('%s','%s','%s','%s','%s','en','%s','%s')" % (name, room_no, phone, user_id, email, emailcheckcode,date))
                         db.commit()
                         sendcheckcode(email, emailcheckcode)
                         line_bot_api.reply_message(
@@ -609,9 +782,9 @@ def handle_message(event):
                                 QuickReplyButton(action=MessageAction(
                                     label="開門", text="開門")),
                                 QuickReplyButton(action=MessageAction(
-                                    label="開啟電器", text="開啟電器")),
+                                    label="開啟插座電源", text="開啟插座電源")),
                                 QuickReplyButton(action=MessageAction(
-                                    label="關閉電器", text="關閉電器")),
+                                    label="關閉插座電源", text="關閉插座電源")),
                             ]
                         ))
                 )
@@ -626,7 +799,42 @@ def handle_message(event):
                                             label="幫助", text="help"))
                                     ])
                 )
-
+                
+        elif event.message.text == "個人資訊":
+            if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
+                user_info = search_user_info(user_id)
+                output = "房號：{0}\n註冊時間：{1}".format(user_info[1],user_info[4])
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text=output,
+                        quick_reply=QuickReply(
+                            items=[
+                                QuickReplyButton(action=MessageAction(
+                                    label="幫助", text="help")),
+                                QuickReplyButton(action=MessageAction(
+                                    label="故障回報", text="故障回報")),
+                                QuickReplyButton(action=MessageAction(
+                                    label="開門", text="開門")),
+                                QuickReplyButton(action=MessageAction(
+                                    label="開啟插座電源", text="開啟插座電源")),
+                                QuickReplyButton(action=MessageAction(
+                                    label="關閉插座電源", text="關閉插座電源")),
+                            ]
+                        ))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="非本棟用戶，拒絕使用。",
+                                    items=[
+                                        QuickReplyButton(action=MessageAction(
+                                            label="房客註冊", text="房客註冊")),
+                                        QuickReplyButton(action=MessageAction(
+                                            label="幫助", text="help"))
+                                    ])
+                )
+                
         elif str(event.message.text).find("r") != -1 or str(event.message.text).find("r") != -1:
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 try:
@@ -645,7 +853,7 @@ def handle_message(event):
                     date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                     info = search_user_info(user_id)
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='123qwe', db='room_data', charset='utf8mb4')
+                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "INSERT INTO failure_report(name,room_no,phone,report,date,schedule,email) VALUES ('%s','%s','%s','%s','%s','尚未檢查','%s')" % (info[0], info[1], info[2], data_2, date, info[3]))
@@ -666,9 +874,9 @@ def handle_message(event):
                                                 QuickReplyButton(action=MessageAction(
                                                     label="開門", text="開門")),
                                                 QuickReplyButton(action=MessageAction(
-                                                    label="開啟電器", text="開啟電器")),
+                                                    label="開啟插座電源", text="開啟插座電源")),
                                                 QuickReplyButton(action=MessageAction(
-                                                    label="關閉電器", text="關閉電器")),
+                                                    label="關閉插座電源", text="關閉插座電源")),
                                             ]
                                         ))
                     )
@@ -734,7 +942,7 @@ def handle_message(event):
 
     reply_arr = []
     reply_arr.append(TextSendMessage('上傳成功'))
-    reply_arr.append(TextSendMessage('相簿網址:https://imgur.com/a/-'))
+    reply_arr.append(TextSendMessage('相簿網址:https://imgur.com/a/cvFJ6ib'))
 
     if isinstance(event.message, ImageMessage):
         ext = 'jpg'
@@ -774,7 +982,7 @@ def handle_message(event):
 def search_user(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT check_status FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -789,10 +997,10 @@ def search_user(user_id):
 def search_user_info(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
-            "SELECT name,room_no,phone,email FROM tenant_info WHERE lineid = '%s'" % (user_id))
+            "SELECT name,room_no,phone,email,time FROM tenant_info WHERE lineid = '%s'" % (user_id))
         checkcorrect = cursor.fetchone()
         return checkcorrect
     except Exception as e:
@@ -804,7 +1012,7 @@ def search_user_info(user_id):
 def search_emailcheckcode(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT emailCheckcode FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -819,7 +1027,7 @@ def search_emailcheckcode(user_id):
 def update_checkstatus(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "UPDATE tenant_info SET check_status='n' WHERE lineid='%s'" % (user_id))
@@ -833,7 +1041,7 @@ def update_checkstatus(user_id):
 def search_user_register_list():
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT id,name,phone,check_status FROM tenant_info WHERE check_status = 'n'")
@@ -852,7 +1060,7 @@ def search_user_register_list():
 def find_user(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT name,room_no,phone,email FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -868,7 +1076,7 @@ def find_user(user_id):
 def find_user_email(id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT email FROM failure_report WHERE id='%s'" % (id))
@@ -883,7 +1091,7 @@ def find_user_email(id):
 def search_user_report_list():
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='123qwe', db='room_data', charset='utf8mb4')
+                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT id,name,room_no,phone,report,date,schedule FROM failure_report WHERE schedule != '已解決'")
@@ -933,8 +1141,8 @@ def currload():
 def emailnotify(subject, notice):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "-"  # 寄件者
-    content["to"] = "-"  # 收件者
+    content["from"] = "-@gmail.com"  # 寄件者
+    content["to"] = "-@gmail.com"  # 收件者
     content.attach(
         MIMEText("{0}".format(notice)))  # 郵件內容
 
@@ -942,7 +1150,7 @@ def emailnotify(subject, notice):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-", "-")  # 登入寄件者gmail
+            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             smtp.quit()
             print("傳送成功!")
@@ -953,7 +1161,7 @@ def emailnotify(subject, notice):
 def sendcheckcode(email, emailcheckcode):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = "註冊宿舍驗證碼"  # 郵件標題
-    content["from"] = "-"  # 寄件者
+    content["from"] = "-@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的驗證碼為：{0}".format(emailcheckcode)))  # 郵件內容
@@ -962,7 +1170,7 @@ def sendcheckcode(email, emailcheckcode):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-", "-")  # 登入寄件者gmail
+            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -973,7 +1181,7 @@ def sendcheckcode(email, emailcheckcode):
 def sendsuccess(subject, email):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "-"  # 寄件者
+    content["from"] = "-@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的資料已經認證成功!可開始使用各項功能!"))  # 郵件內容
@@ -982,7 +1190,7 @@ def sendsuccess(subject, email):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-@gmail.com", "-")  # 登入寄件者gmail
+            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -1002,14 +1210,51 @@ def sendchange(email, attach):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-", "-")  # 登入寄件者gmail
+            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
         except Exception as e:
             print("Error message: ", e)
 
+def make_temp_pic(text,text1):
+    img = cv2.imread("temperature.png")
+    imgPil = Image.fromarray(img)
+    fontPath = "./font.ttf"
+    font = ImageFont.truetype(fontPath,120)
+    font1 = ImageFont.truetype(fontPath,50)
+    draw = ImageDraw.Draw(imgPil)
+    draw.text((142,121),text,font=font,fill=(0,0,0))
+    draw.text((210,305),text1,font=font1,fill=(0,0,0))
+    img = np.array(imgPil)
+    name = (''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+    name += ".jpg"
+    path = "C:\\Users\\goldcity5\\Desktop\\project\\pylinebot\\temperature\\"
+    path += name
+    cv2.imwrite(path,img)
+    im = pyimgur.Imgur(client_id)
+    uploaded_image = im.upload_image(path,title="123")
+    os.remove(path)
+    return(uploaded_image.link)
 
+def make_power_pic(text):
+    img = cv2.imread("power.png")
+    imgPil = Image.fromarray(img)
+    fontPath = "./font.ttf"
+    font = ImageFont.truetype(fontPath,120)
+    draw = ImageDraw.Draw(imgPil)
+    draw.text((478,489),text,font=font,fill=(0,0,0))
+    img = np.array(imgPil)
+    name = (''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)))
+    name += ".jpg"
+    path = "C:\\Users\\goldcity5\\Desktop\\project\\pylinebot\\power\\"
+    path += name
+    cv2.imwrite(path,img)
+    im = pyimgur.Imgur(client_id)
+    uploaded_image = im.upload_image(path,title="123")
+    os.remove(path)
+    return(uploaded_image.link)
+  
 @ handler.add(FollowEvent)
 def handle_follow(event):
     line_bot_api.reply_message(
@@ -1022,6 +1267,17 @@ def handle_follow(event):
                                 label="幫助", text="幫助"))
                         ]))
 
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    # postback 資料
+    data = event.postback.data
+    # 使用者Id
+    userId = event.source.user_id
+    
+    # 上一頁
+    if data == "action=prev":
+        # 移除個別用戶選單
+        line_bot_api.unlink_rich_menu_from_user(userId) 
 
 if __name__ == "__main__":
     app.run()
