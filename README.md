@@ -125,6 +125,7 @@ help
 * Mosquitto
 * Line
 * ngrok
+* opencv
 ### 硬體
 * Arduino ESP8266、ESP32
 * 電控鎖、RC522、插座、繼電器
