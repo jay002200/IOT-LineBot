@@ -4,7 +4,7 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 
-headers = {"Authorization":"Bearer Q/ZeUjCnzH4RTszO7WYyja0DKvhcWQyu6BgGpYeP6pOMjtnT4q4Dy38yL9mzM4yvSaCTEe53AyAc94dRFzsFLfQoILeqhWq04DOtP92yDkEejnDcj6V7f8bd5vs7XUVLcP+WlWpHy6uBpzTqiii9JwdB04t89/1O/w1cDnyilFU=","Content-Type":"application/json"}
+headers = {"Authorization":"Bearer channel_access_token","Content-Type":"application/json"}
 
 body = {
     "size": {"width": 2500, "height": 1686},
@@ -39,7 +39,7 @@ menuid = json.loads(req.text)
 richmenuid = menuid['richMenuId']
 print(richmenuid)
 
-line_bot_api = LineBotApi('Q/ZeUjCnzH4RTszO7WYyja0DKvhcWQyu6BgGpYeP6pOMjtnT4q4Dy38yL9mzM4yvSaCTEe53AyAc94dRFzsFLfQoILeqhWq04DOtP92yDkEejnDcj6V7f8bd5vs7XUVLcP+WlWpHy6uBpzTqiii9JwdB04t89/1O/w1cDnyilFU=')
+line_bot_api = LineBotApi('channel_access_token')
 
 with open("menu2.png", 'rb') as f:
     line_bot_api.set_rich_menu_image(richmenuid, "image/jpeg", f)

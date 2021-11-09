@@ -2,7 +2,7 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 
-line_bot_api = LineBotApi('H5ExUQxWHnJmOQlGUh0/SDmxb/8AZvKrOAqoGHARDfpMA1yrXJRnME0uL0NSzNxbGYkvPrk56VBs5D9gmwyh1rUoktZpeHcGfgHvp18mtX6pjF3zB4fH6/MUrWWB7CXankjsBfeXV2Gy143lbN74CQdB04t89/1O/w1cDnyilFU=')
+line_bot_api = LineBotApi('channel_access_token')
 
 rich_menu_list = line_bot_api.get_rich_menu_list()
 
