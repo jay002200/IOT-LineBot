@@ -106,7 +106,7 @@ help
 ```
 指令：管理員選單
 ```
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/2.jpg>
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/2.jpg">
 
 ### 查詢房客(管理員)
 * 查詢房客的基本資料。
