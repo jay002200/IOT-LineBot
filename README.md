@@ -40,7 +40,7 @@ help
 ### 房間資訊
 查看房間的溫度和濕度，以及台灣目前用電量。
 * (資料來自https://www.taipower.com.tw/tc/page.aspx?mid=206)
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/roominfo.png">
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/1.jpg">
 
 ### 開啟/關閉電器
 * 傳送指令，房客就可開/關自己房間的插座電源。
@@ -101,6 +101,12 @@ help
 * 傳送指令，房客就可開啟大門。
 <img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/x4cg4-drlt1.gif">
 
+###管理員選單
+* 傳送指令，即可更換管理員專用選單。
+```
+指令：管理員選單
+```
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/2.jpg>
 
 ### 查詢房客(管理員)
 * 查詢房客的基本資料。
