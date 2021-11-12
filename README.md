@@ -61,7 +61,7 @@ help
 ```
 指令:開啟電燈
 ```
-<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ledopen.gif">
+<img src="https://github.com/jay002200/IOT-LineBot/blob/main/img/ledon.gif">
 
 ```
 指令:關閉電燈
