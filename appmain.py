@@ -218,7 +218,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                                         passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "UPDATE tenant_info SET check_status='Y' WHERE id='%s'" % (check))
@@ -294,7 +294,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                                         passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "UPDATE failure_report SET schedule='{0}' WHERE id='{1}'".format(
@@ -380,7 +380,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                                         passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "SELECT room_no,name,phone FROM tenant_info WHERE room_no = '%s'" % (check))
@@ -435,7 +435,67 @@ def handle_message(event):
         
         elif event.message.text == "管理員選單":
             if search_user(user_id) == "Administrator":
-                line_bot_api.link_rich_menu_to_user(user_id, "richmenu-cb829a6c6bf801897231cdab400c21cc")
+                line_bot_api.link_rich_menu_to_user(user_id, "richmenu-a7ce27412aa6f157e8bb3b08d6949579")
+                
+#------------------mysqlcommand--------------------------
+        elif event.message.text == "資料庫列出所有資料":
+                    line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=mysql_printalldata())
+                    )
+        
+        elif event.message.text == "資料庫修改資料":
+                    line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="輸入 update id 欄位 要修改的資料")
+                    )
+
+        elif str(event.message.text).find("update") != -1 or str(event.message.text).find("Update") != -1:
+            if search_user(user_id) == "Administrator":
+                try:
+                    data_1, data_2 = str(event.message.text).split('update ', 1)
+                    id, title, data, = str(data_2).split(' ', 2)
+                    check = str(data_2)
+                except Exception as e:
+                    pass
+
+                try:
+                    data_1, data_2 = str(event.message.text).split('Update ', 1)
+                    id, title, data, = str(data_2).split(' ', 2)
+                    check = str(data_2)
+                except Exception as e:
+                    pass
+                
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=mysql_modify(id,title,data))
+                    )
+
+        elif event.message.text == "資料庫刪除資料":
+                    line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text="輸入 delete id")
+                    )
+        
+        elif str(event.message.text).find("delete") != -1 or str(event.message.text).find("Delete") != -1:
+            if search_user(user_id) == "Administrator":
+                try:
+                    data_1, data_2 = str(event.message.text).split('Delete ', 1)
+                    check = str(data_2)
+                except Exception as e:
+                    pass
+
+                try:
+                    data_1, data_2 = str(event.message.text).split('delete ', 1)
+                    check = str(data_2)
+                except Exception as e:
+                    pass
+                
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(text=mysql_delete(check))
+                    )
+#------------------mysqlcommand--------------------------
 # -----------------------------------------------
         elif event.message.text == "開門":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
@@ -487,7 +547,7 @@ def handle_message(event):
         elif event.message.text == "開啟插座電源":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 checkroom = search_user_info(user_id)
-                if checkroom[1] == "A1":
+                if checkroom[1] == "A1" or search_user(user_id) == 'Administrator':
                     client = mqtt.Client()
                     client.username_pw_set("yujie", "12345")
                     client.connect(mqtt_address, 1883, 60)
@@ -530,7 +590,7 @@ def handle_message(event):
         elif event.message.text == "關閉插座電源":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 checkroom = search_user_info(user_id)
-                if checkroom[1] == "A1":
+                if checkroom[1] == "A1" or search_user(user_id) == 'Administrator':
                     client = mqtt.Client()
                     client.username_pw_set("yujie", "12345")
                     client.connect(mqtt_address, 1883, 60)
@@ -579,7 +639,7 @@ def handle_message(event):
         elif event.message.text == "開啟電燈":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 checkroom = search_user_info(user_id)
-                if checkroom[1] == "A1":
+                if checkroom[1] == "A1" or checkroom[1] == "Administrator":
                     client = mqtt.Client()
                     client.username_pw_set("yujie", "12345")
                     client.connect(mqtt_address, 1883, 60)
@@ -622,7 +682,7 @@ def handle_message(event):
         elif event.message.text == "關閉電燈":
             if search_user(user_id) == 'Y' or search_user(user_id) == 'Administrator':
                 checkroom = search_user_info(user_id)
-                if checkroom[1] == "A1":
+                if checkroom[1] == "A1" or checkroom[1] == "Administrator":
                     client = mqtt.Client()
                     client.username_pw_set("yujie", "12345")
                     client.connect(mqtt_address, 1883, 60)
@@ -704,20 +764,33 @@ def handle_message(event):
                                         ])))
 
         elif event.message.text == "房客註冊":
-            line_bot_api.reply_message(
-                event.reply_token,
-                TextSendMessage(
-                    text="請先輸入關鍵字add，輸入姓名、房號、電話和信箱\n範例:add 田中央 A1 0912345678 TSJ55688@gmail.com")
-            )
-
-        elif str(event.message.text).find("Add") != -1 or str(event.message.text).find("add") != -1:
-            if(search_user) == 'Y':
+            if(search_user(user_id)) == 'Y' or (search_user(user_id)) == 'Administrator':
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
                         text="您已註冊過，無需註冊。")
                 )
-            elif(search_user) == 'en':
+            elif(search_user(user_id)) == 'en':
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text="請至信箱收取驗證碼後輸入驗證碼。")
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text="請先輸入關鍵字add，輸入姓名、房號、電話和信箱\n範例:add 田中央 A1 0912345678 TSJ55688@gmail.com")
+                )
+
+        elif str(event.message.text).find("Add") != -1 or str(event.message.text).find("add") != -1:
+            if(search_user(user_id)) == 'Y':
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    TextSendMessage(
+                        text="您已註冊過，無需註冊。")
+                )
+            elif(search_user(user_id)) == 'en':
                 line_bot_api.reply_message(
                     event.reply_token,
                     TextSendMessage(
@@ -738,7 +811,7 @@ def handle_message(event):
 
                 try:
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                                         passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     try:
                         emailcheckcode = random.randrange(10000, 99999)
@@ -853,7 +926,7 @@ def handle_message(event):
                     date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
                     info = search_user_info(user_id)
                     db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                                         passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                                         passwd='123qwe', db='room_data', charset='utf8mb4')
                     cursor = db.cursor()
                     cursor.execute(
                         "INSERT INTO failure_report(name,room_no,phone,report,date,schedule,email) VALUES ('%s','%s','%s','%s','%s','尚未檢查','%s')" % (info[0], info[1], info[2], data_2, date, info[3]))
@@ -869,7 +942,7 @@ def handle_message(event):
                                             items=[
                                                 QuickReplyButton(action=MessageAction(
                                                     label="幫助", text="help")),
-                                                QuickReplyButton(action=MessageAction(
+                                            +    QuickReplyButton(action=MessageAction(
                                                     label="故障回報", text="故障回報")),
                                                 QuickReplyButton(action=MessageAction(
                                                     label="開門", text="開門")),
@@ -978,11 +1051,61 @@ def handle_message(event):
                 TextSendMessage('上傳失敗'))
         return 0
 
+#Mysql command
+#------------------
+def mysql_printalldata():
+    try:
+        db = MySQLdb.connect(host='localhost', port=3306, user='root',
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT id,name,room_no,phone,check_status FROM tenant_info")
+        tup = cursor.fetchall()
+        notice = "房客註冊列表：\nid name room_no phone check_status"
+        for i in range(len(tup)):
+            notice += '\n'
+            notice += str(tup[i])
+        return notice
+    except Exception as e:
+        print(e)
+    finally:
+        db.close()
+        
+def mysql_modify(mysql_id,mysql_title,mysql_data):
+    try:
+        db = MySQLdb.connect(host='localhost', port=3306, user='root',
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute(
+            ("UPDATE tenant_info SET {0} ='{1}' WHERE id ='{2}'").format(mysql_title,mysql_data,mysql_id))
+        db.commit()
+    except Exception as e:
+        print(e)
+        return e
+    finally:
+        db.close()
+        return "sucess"
+        
+def mysql_delete(mysql_id):
+    try:
+        db = MySQLdb.connect(host='localhost', port=3306, user='root',
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute(
+            ("DELETE FROM tenant_info WHERE id = {0}").format(mysql_id))
+        db.commit()
+    except Exception as e:
+        print(e)
+        return e
+    finally:
+        db.close()
+        return "sucess"
 
+#------------------   
 def search_user(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT check_status FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -994,10 +1117,23 @@ def search_user(user_id):
         db.close()
 
 
+    try:
+        db = MySQLdb.connect(host='localhost', port=3306, user='root',
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
+        cursor = db.cursor()
+        cursor.execute(
+            "SELECT check_status FROM tenant_info WHERE lineid = '%s'" % (user_id))
+        checkcorrect = cursor.fetchone()
+        return checkcorrect[0]
+    except Exception as e:
+        print(e)
+    finally:
+        db.close()
+        
 def search_user_info(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT name,room_no,phone,email,time FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -1012,7 +1148,7 @@ def search_user_info(user_id):
 def search_emailcheckcode(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT emailCheckcode FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -1027,7 +1163,7 @@ def search_emailcheckcode(user_id):
 def update_checkstatus(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "UPDATE tenant_info SET check_status='n' WHERE lineid='%s'" % (user_id))
@@ -1041,10 +1177,10 @@ def update_checkstatus(user_id):
 def search_user_register_list():
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
-            "SELECT id,name,phone,check_status FROM tenant_info WHERE check_status = 'n'")
+            "SELECT id,name,room_no,phone,check_status FROM tenant_info WHERE check_status = 'n'")
         tup = cursor.fetchall()
         notice = "房客註冊列表："
         for i in range(len(tup)):
@@ -1060,7 +1196,7 @@ def search_user_register_list():
 def find_user(user_id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT name,room_no,phone,email FROM tenant_info WHERE lineid = '%s'" % (user_id))
@@ -1076,7 +1212,7 @@ def find_user(user_id):
 def find_user_email(id):
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT email FROM failure_report WHERE id='%s'" % (id))
@@ -1091,7 +1227,7 @@ def find_user_email(id):
 def search_user_report_list():
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user='root',
-                             passwd='yourpasswd', db='room_data', charset='utf8mb4')
+                             passwd='123qwe', db='room_data', charset='utf8mb4')
         cursor = db.cursor()
         cursor.execute(
             "SELECT id,name,room_no,phone,report,date,schedule FROM failure_report WHERE schedule != '已解決'")
@@ -1141,8 +1277,8 @@ def currload():
 def emailnotify(subject, notice):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "-@gmail.com"  # 寄件者
-    content["to"] = "-@gmail.com"  # 收件者
+    content["from"] = "jay002200@gmail.com"  # 寄件者
+    content["to"] = "jay002200@gmail.com"  # 收件者
     content.attach(
         MIMEText("{0}".format(notice)))  # 郵件內容
 
@@ -1150,7 +1286,7 @@ def emailnotify(subject, notice):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("jay002200@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             smtp.quit()
             print("傳送成功!")
@@ -1161,7 +1297,7 @@ def emailnotify(subject, notice):
 def sendcheckcode(email, emailcheckcode):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = "註冊宿舍驗證碼"  # 郵件標題
-    content["from"] = "-@gmail.com"  # 寄件者
+    content["from"] = "jay002200@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的驗證碼為：{0}".format(emailcheckcode)))  # 郵件內容
@@ -1170,7 +1306,7 @@ def sendcheckcode(email, emailcheckcode):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("jay002200@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -1181,7 +1317,7 @@ def sendcheckcode(email, emailcheckcode):
 def sendsuccess(subject, email):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = subject  # 郵件標題
-    content["from"] = "-@gmail.com"  # 寄件者
+    content["from"] = "jay002200@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("您的資料已經認證成功!可開始使用各項功能!"))  # 郵件內容
@@ -1190,7 +1326,7 @@ def sendsuccess(subject, email):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("jay002200@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -1201,7 +1337,7 @@ def sendsuccess(subject, email):
 def sendchange(email, attach):
     content = MIMEMultipart()  # 建立MIMEMultipart物件
     content["subject"] = "維修進度已變動!"  # 郵件標題
-    content["from"] = "-@gmail.com"  # 寄件者
+    content["from"] = "jay002200@gmail.com"  # 寄件者
     content["to"] = email  # 收件者
     content.attach(
         MIMEText("維修進度已變更成：{0}".format(attach)))  # 郵件內容
@@ -1210,7 +1346,7 @@ def sendchange(email, attach):
         try:
             smtp.ehlo()  # 驗證SMTP伺服器
             smtp.starttls()  # 建立加密傳輸
-            smtp.login("-@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
+            smtp.login("jay002200@gmail.com", "rgtvetnfbrlvwgkv")  # 登入寄件者gmail
             smtp.send_message(content)  # 寄送郵件
             print("傳送成功!")
             smtp.quit()
@@ -1278,6 +1414,9 @@ def handle_postback(event):
     if data == "action=prev":
         # 移除個別用戶選單
         line_bot_api.unlink_rich_menu_from_user(userId) 
+        
+    if data == "action=next":
+        line_bot_api.link_rich_menu_to_user(userId, "richmenu-55851767f95250f7f79f8054f5345e13")
 
 if __name__ == "__main__":
     app.run()
